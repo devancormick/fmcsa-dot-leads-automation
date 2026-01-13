@@ -1,0 +1,69 @@
+name: Daily DOT Leads Fetch
+
+on:
+  schedule:
+    # Run daily at 2:00 AM UTC (adjust timezone as needed)
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  fetch-dot-leads:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Create service account JSON
+      env:
+        GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      run: |
+        echo "$GOOGLE_SERVICE_ACCOUNT" > service_account.json
+    
+    - name: Create .env file
+      env:
+        SOCRATA_APP_TOKEN: ${{ secrets.SOCRATA_APP_TOKEN }}
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+        SMTP_PORT: ${{ secrets.SMTP_PORT }}
+        SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+        EMAIL_TO: ${{ secrets.EMAIL_TO }}
+      run: |
+        cat > .env << EOF
+        SOCRATA_DOMAIN=data.transportation.gov
+        SOCRATA_DATASET_ID=49yn-d2k2
+        SOCRATA_APP_TOKEN=$SOCRATA_APP_TOKEN
+        GOOGLE_SHEETS_CREDENTIALS_PATH=service_account.json
+        GOOGLE_SHEET_ID=$GOOGLE_SHEET_ID
+        SMTP_SERVER=$SMTP_SERVER
+        SMTP_PORT=$SMTP_PORT
+        SMTP_USERNAME=$SMTP_USERNAME
+        SMTP_PASSWORD=$SMTP_PASSWORD
+        EMAIL_FROM=$EMAIL_FROM
+        EMAIL_TO=$EMAIL_TO
+        OUTPUT_DIR=output/csv
+        EOF
+    
+    - name: Run DOT Leads Automation
+      run: |
+        python main.py
+    
+    - name: Upload CSV artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: dot-leads-csv
+        path: output/csv/*.csv
+        retention-days: 30
