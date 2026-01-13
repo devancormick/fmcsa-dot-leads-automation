@@ -15,25 +15,26 @@ if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/
     exit 1
 fi
 
-# Check if container is running
+# Run docker-compose down
 cd "$SCRIPT_DIR"
-if docker-compose ps | grep -q "dot-leads-automation.*Up"; then
-    echo "Stopping Docker container..."
-    docker-compose down
+echo "Stopping Docker container..."
+docker-compose down
+
+# Check the result
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "✅ Container stopped successfully!"
     
-    if [ $? -eq 0 ]; then
-        echo ""
-        echo "✅ Container stopped successfully!"
+    # Verify it's actually stopped
+    if docker-compose ps 2>/dev/null | grep -q "dot-leads-automation.*Up"; then
+        echo "⚠️  Warning: Container may still be running"
     else
-        echo ""
-        echo "❌ Error stopping container"
-        exit 1
+        echo "✅ Verified: Container is stopped"
     fi
 else
-    echo "Container is not running."
     echo ""
-    echo "To remove stopped containers:"
-    echo "  docker-compose down"
+    echo "❌ Error stopping container"
+    exit 1
 fi
 
 echo ""
