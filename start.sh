@@ -43,7 +43,7 @@ mkdir -p "$SCRIPT_DIR/logs"
 echo "Starting Docker container..."
 echo "The container will run continuously and execute tasks daily at 2:00 AM"
 echo ""
-echo "To stop: docker-compose down"
+echo "To stop: ./stop.sh"
 echo "To view logs: docker-compose logs -f"
 echo ""
 
