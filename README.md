@@ -2,6 +2,21 @@
 
 Automated system that pulls all newly created USDOT numbers in the U.S. every day from FMCSA/DOT Open Data, formats them into a clean lead list, and delivers it automatically via Google Sheets and email.
 
+## Quick Start (Docker - Recommended)
+
+**Single command to start and run continuously:**
+
+```bash
+./start.sh
+```
+
+This will:
+- Build the Docker container
+- Start the container in the background
+- Keep it running continuously
+- Execute tasks daily at 2:00 AM automatically
+- Continue running until you stop it with `docker-compose down`
+
 ## Features
 
 - ✅ Daily fetch of new DOT records from FMCSA Socrata API

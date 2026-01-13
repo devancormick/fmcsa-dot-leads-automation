@@ -28,5 +28,5 @@ ENV PYTHONIOENCODING=utf-8
 # Set entrypoint
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-# Default command (can be overridden)
-CMD ["python", "main.py"]
+# Default command - run scheduler to keep container running
+CMD ["python", "scheduler.py"]
