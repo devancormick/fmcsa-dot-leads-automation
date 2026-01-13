@@ -33,11 +33,37 @@ DATE_FORMAT = "%Y-%m-%d"
 MODE = os.getenv("MODE", "production").lower()  # "test" or "production"
 
 # Test interval in seconds - must be a positive number
+# Supports mathematical expressions like "60*1", "300", "60*5", etc.
+def safe_eval_interval(value, default=300):
+    """Safely evaluate TEST_INTERVAL_SECONDS, supporting expressions like 60*1"""
+    if not value:
+        return default
+    
+    try:
+        # First try direct integer conversion
+        return int(value)
+    except ValueError:
+        # If that fails, try evaluating as mathematical expression
+        try:
+            # Only allow numbers, operators, spaces, and parentheses for safety
+            allowed_chars = set('0123456789+-*/(). ')
+            if all(c in allowed_chars for c in value):
+                result = eval(value)
+                result_int = int(result)
+                if result_int <= 0:
+                    raise ValueError("Result must be positive")
+                return result_int
+            else:
+                raise ValueError("Invalid characters in expression")
+        except (ValueError, TypeError, SyntaxError, ZeroDivisionError):
+            return default
+
 try:
-    TEST_INTERVAL_SECONDS = int(os.getenv("TEST_INTERVAL_SECONDS", "300"))
+    test_interval_str = os.getenv("TEST_INTERVAL_SECONDS", "300")
+    TEST_INTERVAL_SECONDS = safe_eval_interval(test_interval_str, 300)
     if TEST_INTERVAL_SECONDS <= 0:
-        raise ValueError("TEST_INTERVAL_SECONDS must be a positive number")
-except (ValueError, TypeError):
+        TEST_INTERVAL_SECONDS = 300
+except Exception:
     # Default to 300 seconds (5 minutes) if invalid
     TEST_INTERVAL_SECONDS = 300
 

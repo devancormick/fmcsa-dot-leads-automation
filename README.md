@@ -116,8 +116,10 @@ OUTPUT_DIR=output/csv
 # MODE: "test" or "production"
 MODE=production
 
-# Test Mode: Interval in seconds (default: 300 = 5 minutes)
-TEST_INTERVAL_SECONDS=300
+# Test Mode: Interval in seconds - supports mathematical expressions
+# Examples: 300, 60*1, 60*5, (60*2)+30
+# Default: 300 = 5 minutes
+TEST_INTERVAL_SECONDS=60*1
 
 # Production Mode: Daily schedule (UTC)
 PRODUCTION_CRON_HOUR=2      # Hour (0-23), default: 2 AM
