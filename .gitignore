@@ -41,6 +41,7 @@ token.json
 # Logs
 *.log
 logs/
+pm2-*.log
 
 # OS
 .DS_Store

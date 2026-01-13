@@ -210,12 +210,65 @@ Deploy as a Google Cloud Function with Cloud Scheduler:
 
 Similar to AWS Lambda, deploy as an Azure Function with Timer trigger.
 
+### 6. PM2 Process Manager
+
+PM2 is a process manager that can manage your Python script with monitoring, logging, and auto-restart capabilities.
+
+**Prerequisites:**
+- Node.js installed (PM2 requires Node.js)
+- Install PM2: `npm install -g pm2`
+
+**Option A: Use the setup script (recommended)**
+```bash
+./setup_pm2.sh
+```
+
+**Option B: Manual setup**
+```bash
+# Start with PM2
+pm2 start ecosystem.config.js
+
+# Or start the one-time execution version
+pm2 start ecosystem.config.js --only dot-leads-automation-once
+
+# Save PM2 process list
+pm2 save
+
+# Setup PM2 to start on system boot
+pm2 startup
+pm2 save
+```
+
+**PM2 Features:**
+- Process monitoring and auto-restart
+- Log management (rotated logs)
+- Memory/CPU monitoring
+- Built-in cron scheduling (via `cron_restart`)
+- Web dashboard: `pm2 web`
+
+**Useful PM2 Commands:**
+```bash
+pm2 list                          # List all processes
+pm2 logs dot-leads-automation     # View logs
+pm2 monit                         # Monitor processes
+pm2 stop dot-leads-automation     # Stop the process
+pm2 restart dot-leads-automation  # Restart the process
+pm2 delete dot-leads-automation   # Remove from PM2
+```
+
+**For scheduled execution:**
+- Use `cron_restart` in `ecosystem.config.js` (runs daily at 2 AM)
+- Or combine with cron: `0 2 * * * pm2 restart dot-leads-automation-once`
+
+**Configuration file:** `ecosystem.config.js`
+
 ### Comparison
 
 | Method | Pros | Cons |
 |--------|------|------|
 | GitHub Actions | Free, easy setup, integrated with repo | Limited to GitHub repos |
 | Cron | Full control, no external dependencies | Requires always-on server |
+| PM2 | Process monitoring, logging, auto-restart | Requires Node.js |
 | AWS Lambda | Serverless, scalable, pay-per-use | AWS account required |
 | Cloud Functions | Serverless, integrated with GCP | GCP account required |
 
