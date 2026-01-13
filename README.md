@@ -277,73 +277,97 @@ pm2 delete dot-leads-automation   # Remove from PM2
 
 **Configuration file:** `ecosystem.config.js`
 
-### 7. Docker (Containerized Deployment)
+### 7. Docker (Containerized Deployment) - **RECOMMENDED**
 
-Docker provides a consistent environment across different systems and easy deployment.
+Docker provides a consistent environment and the easiest way to run the automation continuously.
 
 **Prerequisites:**
 - Docker installed: https://docs.docker.com/get-docker/
 - Docker Compose installed (usually included with Docker Desktop)
 
-**Option A: Use the setup script (recommended)**
+**🚀 Quick Start - Single Command:**
 ```bash
-./setup_docker.sh
+./start.sh
 ```
 
-**Option B: Manual Docker commands**
+This single command will:
+- Build the Docker container
+- Start it in the background
+- Keep it running continuously
+- Execute tasks daily at 2:00 AM automatically
+- Continue running until stopped
 
-**Build the image:**
+**Stop the container:**
 ```bash
-docker build -t dot-leads-automation:latest .
-```
-
-**Run once:**
-```bash
-docker run --rm \
-  --env-file .env \
-  -v $(pwd)/service_account.json:/app/service_account.json:ro \
-  -v $(pwd)/output:/app/output \
-  -v $(pwd)/logs:/app/logs \
-  dot-leads-automation:latest
-```
-
-**Run with Docker Compose:**
-```bash
-# Build and run
-docker-compose up --build
-
-# Run in background
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop
 docker-compose down
 ```
 
-**Scheduled execution with cron (inside container):**
+**View logs:**
 ```bash
-# Start scheduler container
-docker-compose up -d dot-leads-scheduler
-
-# View logs
-docker-compose logs -f dot-leads-scheduler
+docker-compose logs -f
 ```
 
+**Manual Docker Commands:**
+
+**Build and start:**
+```bash
+docker-compose up --build -d
+```
+
+**View logs:**
+```bash
+docker-compose logs -f
+```
+
+**Check status:**
+```bash
+docker-compose ps
+```
+
+**Stop:**
+```bash
+docker-compose down
+```
+
+**Restart:**
+```bash
+docker-compose restart
+```
+
+**How it works:**
+- The container runs `scheduler.py` which keeps the container alive
+- Scheduler executes `main.py` daily at 2:00 AM UTC
+- Container runs continuously until explicitly stopped
+- All logs are saved to `./logs/` directory
+- CSV files are saved to `./output/csv/` directory
+
 **Docker Features:**
-- Consistent environment across systems
-- Easy deployment and scaling
-- Isolated dependencies
-- Volume mounting for data persistence
-- Health checks included
+- ✅ Runs continuously with a single command
+- ✅ Automatic scheduled execution (daily at 2 AM)
+- ✅ Consistent environment across systems
+- ✅ Easy deployment and scaling
+- ✅ Isolated dependencies
+- ✅ Volume mounting for data persistence
+- ✅ Health checks included
+- ✅ Auto-restart on failure
 
 **Files:**
 - `Dockerfile` - Container definition
-- `docker-compose.yml` - Multi-container setup
+- `docker-compose.yml` - Container orchestration
+- `scheduler.py` - Continuous scheduler that keeps container running
+- `start.sh` - Single command startup script
 - `.dockerignore` - Files excluded from build
-- `docker/crontab` - Cron configuration for scheduler
-- `setup_docker.sh` - Automated setup script
+
+**Useful Docker Commands:**
+```bash
+./start.sh                      # Start (single command)
+docker-compose logs -f           # View logs (follow mode)
+docker-compose ps               # Check status
+docker-compose stop             # Stop container
+docker-compose down             # Stop and remove container
+docker-compose restart          # Restart container
+docker-compose exec dot-leads-automation bash  # Enter container
+```
 
 **Useful Docker Commands:**
 ```bash
