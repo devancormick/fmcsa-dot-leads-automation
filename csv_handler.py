@@ -20,18 +20,19 @@ class CSVHandler:
         """Initialize CSV handler"""
         ensure_output_directory(OUTPUT_DIR)
     
-    def save_records(self, records: List[Dict], date: str) -> str:
+    def save_records(self, records: List[Dict], date: str, suffix: str = "") -> str:
         """
         Save records to CSV file
         
         Args:
             records: Processed DOT records
             date: Date string in YYYY-MM-DD format
+            suffix: Optional suffix for filename (e.g., "_new" for new records only)
         
         Returns:
             Path to the created CSV file
         """
-        filename = f"dot_leads_{date}.csv"
+        filename = f"dot_leads_{date}{suffix}.csv"
         filepath = os.path.join(OUTPUT_DIR, filename)
         
         try:

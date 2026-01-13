@@ -52,30 +52,48 @@ def main(target_date: Optional[str] = None):
             logger.info("No records after processing")
             return
         
-        # Step 3: Save to CSV
-        logger.info("Step 3: Saving records to CSV...")
-        csv_handler = CSVHandler()
-        csv_path = csv_handler.save_records(processed_records, target_date)
-        
-        # Step 4: Upload to Google Sheets
-        logger.info("Step 4: Creating Google Sheet tab...")
+        # Step 3: Upload to Google Sheets and get only new records
+        logger.info("Step 3: Checking Google Sheet for existing records...")
         sheets_handler = GoogleSheetsHandler()
-        sheet_url = sheets_handler.create_daily_tab(target_date, processed_records)
+        sheet_url, new_records, existing_count = sheets_handler.create_daily_tab(target_date, processed_records)
         
-        # Step 5: Send email notification
+        logger.info(f"Comparison results: {len(new_records)} new, {existing_count} existing, {len(processed_records)} total")
+        
+        # Step 4: Save CSV files
+        logger.info("Step 4: Saving records to CSV...")
+        csv_handler = CSVHandler()
+        
+        # Save all records (backup)
+        csv_path_all = csv_handler.save_records(processed_records, target_date, "_all")
+        
+        # Save only new records (for email attachment)
+        csv_path_new = None
+        if new_records:
+            csv_path_new = csv_handler.save_records(new_records, target_date, "_new")
+            logger.info(f"Saved {len(new_records)} new records to CSV: {csv_path_new}")
+        else:
+            logger.info("No new records to save - all records already exist")
+        
+        # Step 5: Send email notification with only new records
         logger.info("Step 5: Sending email notification...")
         email_handler = EmailHandler()
         email_handler.send_daily_report(
             date=target_date,
-            record_count=len(processed_records),
+            new_record_count=len(new_records),
+            total_record_count=len(processed_records),
+            existing_count=existing_count,
             sheet_url=sheet_url,
-            csv_path=csv_path
+            csv_path=csv_path_new  # Only attach CSV with new records
         )
         
         logger.info(f"Successfully completed DOT Leads Automation for {target_date}")
-        logger.info(f"Records processed: {len(processed_records)}")
+        logger.info(f"Total records found: {len(processed_records)}")
+        logger.info(f"New records added: {len(new_records)}")
+        logger.info(f"Existing records: {existing_count}")
         logger.info(f"Google Sheet: {sheet_url}")
-        logger.info(f"CSV file: {csv_path}")
+        if csv_path_new:
+            logger.info(f"New records CSV: {csv_path_new}")
+        logger.info(f"All records CSV: {csv_path_all}")
         
     except Exception as e:
         error_msg = f"Error in DOT Leads Automation: {str(e)}"

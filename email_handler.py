@@ -27,15 +27,19 @@ class EmailHandler:
         self.email_from = EMAIL_FROM or SMTP_USERNAME
         self.email_to = EMAIL_TO
     
-    def send_daily_report(self, date: str, record_count: int, sheet_url: str, csv_path: Optional[str] = None) -> bool:
+    def send_daily_report(self, date: str, new_record_count: int, total_record_count: int, 
+                         existing_count: int, sheet_url: str, csv_path: Optional[str] = None) -> bool:
         """
         Send daily report email with Google Sheet link and CSV attachment
+        Only includes information about NEW records
         
         Args:
             date: Date string in YYYY-MM-DD format
-            record_count: Number of records found
+            new_record_count: Number of NEW records added
+            total_record_count: Total number of records found for this date
+            existing_count: Number of existing records in sheet
             sheet_url: URL to the Google Sheet
-            csv_path: Path to CSV file to attach
+            csv_path: Path to CSV file to attach (should contain only new records)
         
         Returns:
             True if email sent successfully
@@ -49,28 +53,52 @@ class EmailHandler:
             msg = MIMEMultipart()
             msg['From'] = self.email_from
             msg['To'] = ', '.join(self.email_to)
-            msg['Subject'] = f"Daily DOT Leads Report - {date}"
+            
+            # Subject line indicates if there are new records
+            if new_record_count > 0:
+                msg['Subject'] = f"Daily DOT Leads Report - {date} ({new_record_count} NEW records)"
+            else:
+                msg['Subject'] = f"Daily DOT Leads Report - {date} (No new records)"
             
             # Create email body
             body = f"""
 Daily FMCSA DOT Leads Report
 
 Date: {date}
-New DOT Numbers Found: {record_count}
+
+Summary:
+- Total records found for {date}: {total_record_count}
+- Existing records in sheet: {existing_count}
+- NEW records added: {new_record_count}
+
+"""
+            
+            if new_record_count > 0:
+                body += f"""
+✅ {new_record_count} new DOT number(s) have been added to the Google Sheet.
 
 Google Sheet Link:
 {sheet_url}
 
-This report contains all newly registered USDOT numbers for {date}.
+The CSV attachment contains only the NEW records that were added today.
+"""
+            else:
+                body += f"""
+ℹ️  No new records found. All {total_record_count} records for {date} already exist in the sheet.
 
+Google Sheet Link:
+{sheet_url}
+"""
+            
+            body += f"""
 ---
 This is an automated message from the FMCSA DOT Leads Automation system.
 """
             
             msg.attach(MIMEText(body, 'plain'))
             
-            # Attach CSV file if provided
-            if csv_path:
+            # Attach CSV file if provided and contains new records
+            if csv_path and new_record_count > 0:
                 try:
                     with open(csv_path, 'rb') as attachment:
                         part = MIMEBase('application', 'octet-stream')
@@ -82,7 +110,7 @@ This is an automated message from the FMCSA DOT Leads Automation system.
                         f'attachment; filename= {os.path.basename(csv_path)}'
                     )
                     msg.attach(part)
-                    logger.info(f"Attached CSV file: {csv_path}")
+                    logger.info(f"Attached CSV file with {new_record_count} new records: {csv_path}")
                 except Exception as e:
                     logger.warning(f"Could not attach CSV file: {str(e)}")
             
