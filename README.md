@@ -438,7 +438,7 @@ TEST_MODE=true TEST_INTERVAL_MINUTES=10 docker-compose up -d
 - `start-test.sh` - Run without Docker (test mode, every 5 minutes)
 - `start-docker.sh` - Run with Docker (production mode)
 - `start-docker-test.sh` - Run with Docker (test mode, every 5 minutes)
-- `stop.sh` - Stop Docker container script
+- `stop-docker.sh` - Stop Docker container script
 - `.dockerignore` - Files excluded from build
 
 **Useful Commands:**
