@@ -35,8 +35,10 @@ class DOTFetcher:
         logger.info(f"Fetching DOT records for date: {target_date}")
         
         # Build query: filter by ADD_DATE
-        # Socrata uses $where clause for date filtering
-        where_clause = f"add_date >= '{target_date}T00:00:00.000' AND add_date < '{target_date}T23:59:59.999'"
+        # add_date is stored as YYYYMMDD string format (e.g., "20240112")
+        # Convert target_date to YYYYMMDD format for comparison
+        date_str = target_date.replace('-', '')
+        where_clause = f"add_date = '{date_str}'"
         
         all_records = []
         limit = 50000  # Socrata default limit
