@@ -68,7 +68,19 @@ def calculate_next_run_time(test_mode=False, test_interval_seconds=None):
     
     if test_mode:
         # Test mode: run every N seconds
-        interval = test_interval_seconds if test_interval_seconds is not None else TEST_INTERVAL_SECONDS
+        # Ensure test_interval_seconds is a valid number
+        if test_interval_seconds is not None:
+            try:
+                interval = int(test_interval_seconds)
+                if interval <= 0:
+                    logger.warning(f"Invalid TEST_INTERVAL_SECONDS: {interval}. Using default: {TEST_INTERVAL_SECONDS}")
+                    interval = TEST_INTERVAL_SECONDS
+            except (ValueError, TypeError):
+                logger.warning(f"Invalid TEST_INTERVAL_SECONDS: {test_interval_seconds}. Using default: {TEST_INTERVAL_SECONDS}")
+                interval = TEST_INTERVAL_SECONDS
+        else:
+            interval = TEST_INTERVAL_SECONDS
+        
         next_run = now + timedelta(seconds=interval)
         return next_run
     else:
