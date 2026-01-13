@@ -10,7 +10,7 @@ load_dotenv()
 
 # Socrata API Configuration
 SOCRATA_DOMAIN = os.getenv("SOCRATA_DOMAIN", "data.transportation.gov")
-SOCRATA_DATASET_ID = os.getenv("SOCRATA_DATASET_ID", "49yn-d2k2")  # FMCSA Company Census File
+SOCRATA_DATASET_ID = os.getenv("SOCRATA_DATASET_ID", "az4n-8mr2")  # FMCSA Company Census File
 SOCRATA_APP_TOKEN = os.getenv("SOCRATA_APP_TOKEN", "")
 
 # Google Sheets Configuration
