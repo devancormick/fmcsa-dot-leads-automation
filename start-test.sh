@@ -1,29 +1,27 @@
 #!/bin/bash
-# Start script for TEST MODE (runs every 5 minutes)
-# This is useful for testing the application
+# Start script for FMCSA DOT Leads Automation - TEST MODE (without Docker)
+# Runs the Python script directly with test mode (every 5 minutes)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "=========================================="
 echo "FMCSA DOT Leads Automation - TEST MODE"
 echo "=========================================="
+echo "Running without Docker (direct Python execution)"
 echo ""
 echo "⚠️  WARNING: This will run every 5 minutes for testing!"
 echo ""
 
-# Check if Docker is installed
-if ! command -v docker &> /dev/null; then
-    echo "ERROR: Docker is not installed."
-    echo "Please install Docker: https://docs.docker.com/get-docker/"
+# Check if Python is installed
+if ! command -v python3 &> /dev/null; then
+    echo "ERROR: Python 3 is not installed."
+    echo "Please install Python 3.9+"
     exit 1
 fi
 
-# Check if Docker Compose is available
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-    echo "ERROR: Docker Compose is not installed."
-    echo "Please install Docker Compose: https://docs.docker.com/compose/install/"
-    exit 1
-fi
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+echo "Python version: $PYTHON_VERSION"
+echo ""
 
 # Check for required files
 if [ ! -f "$SCRIPT_DIR/.env" ]; then
@@ -38,41 +36,28 @@ if [ ! -f "$SCRIPT_DIR/service_account.json" ]; then
     exit 1
 fi
 
+# Check if dependencies are installed
+if ! python3 -c "import sodapy" 2>/dev/null; then
+    echo "Dependencies not installed. Installing..."
+    pip3 install -r requirements.txt
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to install dependencies"
+        exit 1
+    fi
+    echo "✅ Dependencies installed"
+    echo ""
+fi
+
 # Create necessary directories
 mkdir -p "$SCRIPT_DIR/output/csv"
 mkdir -p "$SCRIPT_DIR/logs"
 
-echo "Starting Docker container in TEST MODE..."
-echo "The container will run continuously and execute tasks every 5 minutes"
+echo "Starting scheduler in TEST MODE..."
+echo "The scheduler will run continuously and execute tasks every 5 minutes"
 echo ""
-echo "To stop: docker-compose down"
-echo "To view logs: docker-compose logs -f"
+echo "Press Ctrl+C to stop"
 echo ""
 
-# Build and start the container with test mode
+# Change to script directory and run scheduler in test mode
 cd "$SCRIPT_DIR"
-TEST_MODE=true TEST_INTERVAL_MINUTES=5 docker-compose up --build -d
-
-# Show status
-echo ""
-echo "Container status:"
-docker-compose ps
-
-echo ""
-echo "✅ Container is running in TEST MODE!"
-echo ""
-echo "🧪 Test Mode Features:"
-echo "  - Runs every 5 minutes (instead of daily)"
-echo "  - Useful for testing and development"
-echo "  - Same functionality as production mode"
-echo ""
-echo "Useful commands:"
-echo "  ./stop.sh                       - Stop the container"
-echo "  docker-compose logs -f          - View logs (follow mode)"
-echo "  docker-compose ps               - Check container status"
-echo "  docker-compose restart          - Restart the container"
-echo ""
-echo "To switch to production mode (daily at 2 AM):"
-echo "  ./stop.sh"
-echo "  ./start.sh"
-echo ""
+python3 scheduler.py --test-mode --test-interval 5

@@ -2,7 +2,9 @@
 
 Automated system that pulls all newly created USDOT numbers in the U.S. every day from FMCSA/DOT Open Data, formats them into a clean lead list, and delivers it automatically via Google Sheets and email.
 
-## Quick Start (Docker - Recommended)
+## Quick Start
+
+### Option 1: Run Without Docker (Direct Python)
 
 **Production Mode - Single command to start and run continuously:**
 
@@ -11,11 +13,11 @@ Automated system that pulls all newly created USDOT numbers in the U.S. every da
 ```
 
 This will:
-- Build the Docker container
-- Start the container in the background
+- Run Python directly on your system
+- Start the scheduler in the background
 - Keep it running continuously
 - Execute tasks daily at 2:00 AM automatically
-- Continue running until you stop it with `docker-compose down`
+- Continue running until you press Ctrl+C
 
 **Test Mode - Run every 5 minutes for testing:**
 
@@ -24,13 +26,27 @@ This will:
 ```
 
 This will:
-- Build the Docker container
+- Run Python directly on your system
 - Start in TEST MODE
 - Execute tasks every 5 minutes (instead of daily)
 - Perfect for testing and development
 - Same functionality as production mode
 
-**Stop the container:**
+### Option 2: Run With Docker (Recommended for Production)
+
+**Production Mode with Docker:**
+
+```bash
+./start-docker.sh
+```
+
+**Test Mode with Docker:**
+
+```bash
+./start-docker-test.sh
+```
+
+**Stop Docker container:**
 
 ```bash
 ./stop.sh
@@ -301,7 +317,7 @@ pm2 delete dot-leads-automation   # Remove from PM2
 
 **Configuration file:** `ecosystem.config.js`
 
-### 7. Docker (Containerized Deployment) - **RECOMMENDED**
+### 7. Docker (Containerized Deployment)
 
 Docker provides a consistent environment and the easiest way to run the automation continuously.
 
@@ -311,7 +327,7 @@ Docker provides a consistent environment and the easiest way to run the automati
 
 **🚀 Quick Start - Production Mode:**
 ```bash
-./start.sh
+./start-docker.sh
 ```
 
 This single command will:
@@ -323,7 +339,7 @@ This single command will:
 
 **🧪 Test Mode - Run every 5 minutes:**
 ```bash
-./start-test.sh
+./start-docker-test.sh
 ```
 
 Test mode features:
@@ -350,13 +366,13 @@ docker-compose logs -f
 **Switch between modes:**
 ```bash
 # Stop current mode
-docker-compose down
+./stop.sh
 
 # Start production mode (daily at 2 AM)
-./start.sh
+./start-docker.sh
 
 # OR start test mode (every 5 minutes)
-./start-test.sh
+./start-docker-test.sh
 ```
 
 **Manual Docker Commands:**
@@ -418,16 +434,25 @@ TEST_MODE=true TEST_INTERVAL_MINUTES=10 docker-compose up -d
 - `Dockerfile` - Container definition
 - `docker-compose.yml` - Container orchestration
 - `scheduler.py` - Continuous scheduler that keeps container running
-- `start.sh` - Single command startup script (production mode)
-- `start-test.sh` - Test mode startup script (runs every 5 minutes)
-- `stop.sh` - Stop script to shutdown the container
+- `start.sh` - Run without Docker (production mode)
+- `start-test.sh` - Run without Docker (test mode, every 5 minutes)
+- `start-docker.sh` - Run with Docker (production mode)
+- `start-docker-test.sh` - Run with Docker (test mode, every 5 minutes)
+- `stop.sh` - Stop Docker container script
 - `.dockerignore` - Files excluded from build
 
 **Useful Commands:**
 ```bash
-./start.sh                      # Start production mode (single command)
-./start-test.sh                 # Start test mode (every 5 minutes)
-./stop.sh                       # Stop container (single command)
+# Without Docker
+./start.sh                      # Start production mode (direct Python)
+./start-test.sh                 # Start test mode (direct Python, every 5 minutes)
+
+# With Docker
+./start-docker.sh               # Start production mode (Docker)
+./start-docker-test.sh          # Start test mode (Docker, every 5 minutes)
+./stop.sh                       # Stop Docker container
+
+# Docker management
 docker-compose logs -f          # View logs (follow mode)
 docker-compose ps               # Check status
 docker-compose restart          # Restart container

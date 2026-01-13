@@ -1,27 +1,25 @@
 #!/bin/bash
-# Single command to start the FMCSA DOT Leads Automation
-# This script starts Docker and keeps the container running with scheduled tasks
+# Start script for FMCSA DOT Leads Automation (without Docker)
+# Runs the Python script directly on the host system
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "=========================================="
 echo "FMCSA DOT Leads Automation"
 echo "=========================================="
+echo "Running without Docker (direct Python execution)"
 echo ""
 
-# Check if Docker is installed
-if ! command -v docker &> /dev/null; then
-    echo "ERROR: Docker is not installed."
-    echo "Please install Docker: https://docs.docker.com/get-docker/"
+# Check if Python is installed
+if ! command -v python3 &> /dev/null; then
+    echo "ERROR: Python 3 is not installed."
+    echo "Please install Python 3.9+"
     exit 1
 fi
 
-# Check if Docker Compose is available
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-    echo "ERROR: Docker Compose is not installed."
-    echo "Please install Docker Compose: https://docs.docker.com/compose/install/"
-    exit 1
-fi
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+echo "Python version: $PYTHON_VERSION"
+echo ""
 
 # Check for required files
 if [ ! -f "$SCRIPT_DIR/.env" ]; then
@@ -36,32 +34,28 @@ if [ ! -f "$SCRIPT_DIR/service_account.json" ]; then
     exit 1
 fi
 
+# Check if dependencies are installed
+if ! python3 -c "import sodapy" 2>/dev/null; then
+    echo "Dependencies not installed. Installing..."
+    pip3 install -r requirements.txt
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to install dependencies"
+        exit 1
+    fi
+    echo "✅ Dependencies installed"
+    echo ""
+fi
+
 # Create necessary directories
 mkdir -p "$SCRIPT_DIR/output/csv"
 mkdir -p "$SCRIPT_DIR/logs"
 
-echo "Starting Docker container..."
-echo "The container will run continuously and execute tasks daily at 2:00 AM"
+echo "Starting scheduler..."
+echo "The scheduler will run continuously and execute tasks daily at 2:00 AM"
 echo ""
-echo "To stop: ./stop.sh"
-echo "To view logs: docker-compose logs -f"
+echo "Press Ctrl+C to stop"
 echo ""
 
-# Build and start the container
+# Change to script directory and run scheduler
 cd "$SCRIPT_DIR"
-docker-compose up --build -d
-
-# Show status
-echo ""
-echo "Container status:"
-docker-compose ps
-
-echo ""
-echo "✅ Container is running!"
-echo ""
-echo "Useful commands:"
-echo "  ./stop.sh                       - Stop the container"
-echo "  docker-compose logs -f          - View logs (follow mode)"
-echo "  docker-compose ps               - Check container status"
-echo "  docker-compose restart          - Restart the container"
-echo ""
+python3 scheduler.py

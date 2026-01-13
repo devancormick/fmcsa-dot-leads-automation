@@ -39,6 +39,8 @@ fi
 
 echo ""
 echo "To start again:"
-echo "  ./start.sh              - Production mode (daily at 2 AM)"
-echo "  ./start-test.sh         - Test mode (every 5 minutes)"
+echo "  ./start.sh                  - Production mode without Docker (daily at 2 AM)"
+echo "  ./start-test.sh             - Test mode without Docker (every 5 minutes)"
+echo "  ./start-docker.sh           - Production mode with Docker (daily at 2 AM)"
+echo "  ./start-docker-test.sh      - Test mode with Docker (every 5 minutes)"
 echo ""
