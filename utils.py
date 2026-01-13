@@ -36,6 +36,13 @@ def format_date(date_str: str, input_format: str = "%Y-%m-%dT%H:%M:%S.000") -> s
             dt = datetime.strptime(date_str, "%Y-%m-%d")
             return date_str
         except (ValueError, AttributeError):
+            # Try YYYYMMDD format (used by FMCSA add_date field)
+            try:
+                if len(date_str) == 8 and date_str.isdigit():
+                    dt = datetime.strptime(date_str, "%Y%m%d")
+                    return dt.strftime("%Y-%m-%d")
+            except (ValueError, AttributeError):
+                pass
             logger.warning(f"Could not parse date: {date_str}")
             return date_str
 
