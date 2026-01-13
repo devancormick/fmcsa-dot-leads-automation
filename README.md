@@ -350,7 +350,7 @@ Test mode features:
 
 **Stop the container:**
 ```bash
-./stop.sh
+./stop-docker.sh
 ```
 
 Or manually:
