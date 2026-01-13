@@ -119,28 +119,105 @@ The script extracts the following fields:
 
 ## Scheduling
 
-### GitHub Actions (Recommended)
+The project supports multiple scheduling options:
+
+### 1. GitHub Actions (Recommended for GitHub-hosted projects)
 
 The project includes a GitHub Actions workflow that runs daily. To enable:
 
 1. Push code to GitHub repository
 2. Add all environment variables as GitHub Secrets:
    - Go to repository Settings > Secrets and variables > Actions
-   - Add each environment variable as a secret
-3. The workflow will run daily at the scheduled time
+   - Add each environment variable as a secret:
+     - `SOCRATA_APP_TOKEN`
+     - `GOOGLE_SERVICE_ACCOUNT_JSON` (full JSON content)
+     - `GOOGLE_SHEET_ID`
+     - `SMTP_SERVER`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`
+     - `EMAIL_FROM`, `EMAIL_TO`
+3. The workflow will run daily at 2:00 AM UTC
+4. You can also trigger manually from the Actions tab
 
-### Cron (Local Server)
+**Workflow file:** `.github/workflows/daily_dot_fetch.yml`
 
-Add to crontab:
+### 2. Cron (Local Server / VPS)
 
+For running on a local server or VPS:
+
+**Option A: Use the setup script (recommended)**
 ```bash
-# Run daily at 2 AM
-0 2 * * * cd /path/to/fmcsa-dot-leads-automation && /usr/bin/python3 main.py >> /var/log/dot_leads.log 2>&1
+./setup_cron.sh
 ```
 
-### AWS Lambda / Cloud Functions
+**Option B: Manual setup**
+```bash
+# Edit crontab
+crontab -e
 
-Wrap `main.py` in a Lambda handler or cloud function and schedule using EventBridge/Cloud Scheduler.
+# Add this line (adjust path and time as needed):
+0 2 * * * cd /path/to/fmcsa-dot-leads-automation && /usr/bin/python3 main.py >> /var/log/dot_leads_automation.log 2>&1
+```
+
+**Logs:** Check `/var/log/dot_leads_automation.log` for execution logs
+
+### 3. AWS Lambda
+
+Deploy as an AWS Lambda function with EventBridge (CloudWatch Events) scheduling:
+
+**Steps:**
+1. Package the project:
+   ```bash
+   zip -r lambda_function.zip . -x "*.git*" -x "output/*" -x "*.log"
+   ```
+
+2. Create Lambda function:
+   - Runtime: Python 3.9+
+   - Handler: `lambda_handler.lambda_handler`
+   - Upload `lambda_function.zip`
+
+3. Set environment variables in Lambda configuration
+
+4. Create EventBridge rule:
+   - Schedule: `cron(0 2 * * ? *)` (daily at 2 AM UTC)
+   - Target: Your Lambda function
+
+**Handler file:** `lambda_handler.py`
+
+### 4. Google Cloud Functions
+
+Deploy as a Google Cloud Function with Cloud Scheduler:
+
+**Steps:**
+1. Deploy the function:
+   ```bash
+   gcloud functions deploy dot-leads-automation \
+     --runtime python39 \
+     --trigger-http \
+     --entry-point cloud_function_handler \
+     --set-env-vars SOCRATA_APP_TOKEN=xxx,GOOGLE_SHEET_ID=xxx,...
+   ```
+
+2. Create Cloud Scheduler job:
+   ```bash
+   gcloud scheduler jobs create http dot-leads-daily \
+     --schedule="0 2 * * *" \
+     --uri="https://REGION-PROJECT.cloudfunctions.net/dot-leads-automation" \
+     --http-method=POST
+   ```
+
+**Handler file:** `cloud_function_handler.py`
+
+### 5. Azure Functions
+
+Similar to AWS Lambda, deploy as an Azure Function with Timer trigger.
+
+### Comparison
+
+| Method | Pros | Cons |
+|--------|------|------|
+| GitHub Actions | Free, easy setup, integrated with repo | Limited to GitHub repos |
+| Cron | Full control, no external dependencies | Requires always-on server |
+| AWS Lambda | Serverless, scalable, pay-per-use | AWS account required |
+| Cloud Functions | Serverless, integrated with GCP | GCP account required |
 
 ## File Structure
 
