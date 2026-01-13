@@ -89,12 +89,12 @@ pip install -r requirements.txt
 
 ### 2. Configure Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root (copy from `.env.example`):
 
 ```env
 # Socrata API Configuration
 SOCRATA_DOMAIN=data.transportation.gov
-SOCRATA_DATASET_ID=49yn-d2k2
+SOCRATA_DATASET_ID=az4n-8mr2
 SOCRATA_APP_TOKEN=your_app_token_here
 
 # Google Sheets Configuration
@@ -111,7 +111,30 @@ EMAIL_TO=recipient1@example.com,recipient2@example.com
 
 # Output Configuration (optional)
 OUTPUT_DIR=output/csv
+
+# Scheduler Configuration
+# MODE: "test" or "production"
+MODE=production
+
+# Test Mode: Interval in seconds (default: 300 = 5 minutes)
+TEST_INTERVAL_SECONDS=300
+
+# Production Mode: Daily schedule (UTC)
+PRODUCTION_CRON_HOUR=2      # Hour (0-23), default: 2 AM
+PRODUCTION_CRON_MINUTE=0    # Minute (0-59), default: 0
 ```
+
+**Scheduler Mode Options:**
+
+- **Production Mode** (`MODE=production`):
+  - Runs daily at the time specified by `PRODUCTION_CRON_HOUR` and `PRODUCTION_CRON_MINUTE`
+  - Default: Daily at 2:00 AM UTC
+  - Example: `PRODUCTION_CRON_HOUR=2` and `PRODUCTION_CRON_MINUTE=0` = 2:00 AM daily
+
+- **Test Mode** (`MODE=test`):
+  - Runs at the interval specified by `TEST_INTERVAL_SECONDS`
+  - Default: Every 300 seconds (5 minutes)
+  - Example: `TEST_INTERVAL_SECONDS=60` = Every 60 seconds (1 minute)
 
 ### 3. Get Socrata API Token
 

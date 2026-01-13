@@ -43,7 +43,7 @@ mkdir -p "$SCRIPT_DIR/output/csv"
 mkdir -p "$SCRIPT_DIR/logs"
 
 echo "Starting Docker container in TEST MODE..."
-echo "The container will run continuously and execute tasks every 5 minutes"
+echo "Test interval: ${TEST_INTERVAL_SECONDS:-300} seconds (from .env or default 5 minutes)"
 echo ""
 echo "To stop: docker-compose down"
 echo "To view logs: docker-compose logs -f"
@@ -51,7 +51,7 @@ echo ""
 
 # Build and start the container with test mode
 cd "$SCRIPT_DIR"
-TEST_MODE=true TEST_INTERVAL_MINUTES=5 docker-compose up --build -d
+MODE=test TEST_INTERVAL_SECONDS=${TEST_INTERVAL_SECONDS:-300} docker-compose up --build -d
 
 # Show status
 echo ""

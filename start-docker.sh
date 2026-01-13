@@ -41,7 +41,12 @@ mkdir -p "$SCRIPT_DIR/output/csv"
 mkdir -p "$SCRIPT_DIR/logs"
 
 echo "Starting Docker container..."
-echo "The container will run continuously and execute tasks daily at 2:00 AM"
+echo "Mode: ${MODE:-production} (from .env file)"
+if [ "${MODE:-production}" = "test" ]; then
+    echo "Test interval: ${TEST_INTERVAL_SECONDS:-300} seconds"
+else
+    echo "Production schedule: Daily at ${PRODUCTION_CRON_HOUR:-2}:${PRODUCTION_CRON_MINUTE:-0} UTC"
+fi
 echo ""
 echo "To stop: ./stop-docker.sh"
 echo "To view logs: docker-compose logs -f"

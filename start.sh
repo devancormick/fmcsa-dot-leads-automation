@@ -57,5 +57,6 @@ echo "Press Ctrl+C to stop"
 echo ""
 
 # Change to script directory and run scheduler
+# Mode is determined by MODE in .env file (production or test)
 cd "$SCRIPT_DIR"
 python3 scheduler.py

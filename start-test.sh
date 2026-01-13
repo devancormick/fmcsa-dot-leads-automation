@@ -59,5 +59,6 @@ echo "Press Ctrl+C to stop"
 echo ""
 
 # Change to script directory and run scheduler in test mode
+# Overrides MODE in .env to force test mode
 cd "$SCRIPT_DIR"
-python3 scheduler.py --test-mode --test-interval 5
+python3 scheduler.py --test-mode

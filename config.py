@@ -29,6 +29,12 @@ EMAIL_TO = os.getenv("EMAIL_TO", "").split(",") if os.getenv("EMAIL_TO") else []
 OUTPUT_DIR = os.getenv("OUTPUT_DIR", "output/csv")
 DATE_FORMAT = "%Y-%m-%d"
 
+# Scheduler Configuration
+MODE = os.getenv("MODE", "production").lower()  # "test" or "production"
+TEST_INTERVAL_SECONDS = int(os.getenv("TEST_INTERVAL_SECONDS", "300"))  # Default: 5 minutes (300 seconds)
+PRODUCTION_CRON_HOUR = int(os.getenv("PRODUCTION_CRON_HOUR", "2"))  # Default: 2 AM UTC
+PRODUCTION_CRON_MINUTE = int(os.getenv("PRODUCTION_CRON_MINUTE", "0"))  # Default: 0 minutes
+
 # Required Fields
 REQUIRED_FIELDS = [
     "dot_number",
