@@ -49,7 +49,7 @@ This will:
 **Stop Docker container:**
 
 ```bash
-./stop.sh
+./stop-docker.sh
 ```
 
 This will:
@@ -366,7 +366,7 @@ docker-compose logs -f
 **Switch between modes:**
 ```bash
 # Stop current mode
-./stop.sh
+./stop-docker.sh
 
 # Start production mode (daily at 2 AM)
 ./start-docker.sh
@@ -450,7 +450,7 @@ TEST_MODE=true TEST_INTERVAL_MINUTES=10 docker-compose up -d
 # With Docker
 ./start-docker.sh               # Start production mode (Docker)
 ./start-docker-test.sh          # Start test mode (Docker, every 5 minutes)
-./stop.sh                       # Stop Docker container
+./stop-docker.sh                # Stop Docker container
 
 # Docker management
 docker-compose logs -f          # View logs (follow mode)
