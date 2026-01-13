@@ -30,6 +30,17 @@ This will:
 - Perfect for testing and development
 - Same functionality as production mode
 
+**Stop the container:**
+
+```bash
+./stop.sh
+```
+
+This will:
+- Stop and remove the Docker container
+- Clean up resources
+- Show status and restart instructions
+
 ## Features
 
 - ✅ Daily fetch of new DOT records from FMCSA Socrata API
@@ -323,6 +334,11 @@ Test mode features:
 
 **Stop the container:**
 ```bash
+./stop.sh
+```
+
+Or manually:
+```bash
 docker-compose down
 ```
 
@@ -404,15 +420,16 @@ TEST_MODE=true TEST_INTERVAL_MINUTES=10 docker-compose up -d
 - `scheduler.py` - Continuous scheduler that keeps container running
 - `start.sh` - Single command startup script (production mode)
 - `start-test.sh` - Test mode startup script (runs every 5 minutes)
+- `stop.sh` - Stop script to shutdown the container
 - `.dockerignore` - Files excluded from build
 
-**Useful Docker Commands:**
+**Useful Commands:**
 ```bash
-./start.sh                      # Start (single command)
-docker-compose logs -f           # View logs (follow mode)
+./start.sh                      # Start production mode (single command)
+./start-test.sh                 # Start test mode (every 5 minutes)
+./stop.sh                       # Stop container (single command)
+docker-compose logs -f          # View logs (follow mode)
 docker-compose ps               # Check status
-docker-compose stop             # Stop container
-docker-compose down             # Stop and remove container
 docker-compose restart          # Restart container
 docker-compose exec dot-leads-automation bash  # Enter container
 ```
