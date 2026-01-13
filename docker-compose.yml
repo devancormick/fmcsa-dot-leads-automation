@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  dot-leads-automation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dot-leads-automation
+    image: dot-leads-automation:latest
+    restart: unless-stopped
+    volumes:
+      # Mount .env file (create from .env.example)
+      - ./.env:/app/.env:ro
+      # Mount service account JSON
+      - ./service_account.json:/app/service_account.json:ro
+      # Mount output directory for CSV files
+      - ./output:/app/output
+      # Mount logs directory
+      - ./logs:/app/logs
+    environment:
+      # Environment variables can be set here or in .env file
+      - PYTHONUNBUFFERED=1
+    # Run once and exit (for cron/scheduler)
+    # Or use restart: always for continuous monitoring
+    command: python main.py
+    # Optional: Add healthcheck
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Alternative: Scheduled runner using cron inside container
+  dot-leads-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dot-leads-scheduler
+    image: dot-leads-automation:latest
+    restart: unless-stopped
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./service_account.json:/app/service_account.json:ro
+      - ./output:/app/output
+      - ./logs:/app/logs
+      # Mount cron configuration
+      - ./docker/crontab:/etc/cron.d/dot-leads-cron:ro
+    command: >
+      sh -c "apt-get update && apt-get install -y cron && 
+             chmod 0644 /etc/cron.d/dot-leads-cron && 
+             crontab /etc/cron.d/dot-leads-cron && 
+             cron && tail -f /dev/null"
+    environment:
+      - PYTHONUNBUFFERED=1

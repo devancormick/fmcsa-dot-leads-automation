@@ -1,0 +1,5 @@
+# Cron configuration for Docker container
+# Runs daily at 2:00 AM UTC
+0 2 * * * root cd /app && python main.py >> /app/logs/cron.log 2>&1
+
+# Empty line required at end of crontab file

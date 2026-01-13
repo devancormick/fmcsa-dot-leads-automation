@@ -262,6 +262,85 @@ pm2 delete dot-leads-automation   # Remove from PM2
 
 **Configuration file:** `ecosystem.config.js`
 
+### 7. Docker (Containerized Deployment)
+
+Docker provides a consistent environment across different systems and easy deployment.
+
+**Prerequisites:**
+- Docker installed: https://docs.docker.com/get-docker/
+- Docker Compose installed (usually included with Docker Desktop)
+
+**Option A: Use the setup script (recommended)**
+```bash
+./setup_docker.sh
+```
+
+**Option B: Manual Docker commands**
+
+**Build the image:**
+```bash
+docker build -t dot-leads-automation:latest .
+```
+
+**Run once:**
+```bash
+docker run --rm \
+  --env-file .env \
+  -v $(pwd)/service_account.json:/app/service_account.json:ro \
+  -v $(pwd)/output:/app/output \
+  -v $(pwd)/logs:/app/logs \
+  dot-leads-automation:latest
+```
+
+**Run with Docker Compose:**
+```bash
+# Build and run
+docker-compose up --build
+
+# Run in background
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
+```
+
+**Scheduled execution with cron (inside container):**
+```bash
+# Start scheduler container
+docker-compose up -d dot-leads-scheduler
+
+# View logs
+docker-compose logs -f dot-leads-scheduler
+```
+
+**Docker Features:**
+- Consistent environment across systems
+- Easy deployment and scaling
+- Isolated dependencies
+- Volume mounting for data persistence
+- Health checks included
+
+**Files:**
+- `Dockerfile` - Container definition
+- `docker-compose.yml` - Multi-container setup
+- `.dockerignore` - Files excluded from build
+- `docker/crontab` - Cron configuration for scheduler
+- `setup_docker.sh` - Automated setup script
+
+**Useful Docker Commands:**
+```bash
+docker-compose up -d              # Start in background
+docker-compose down               # Stop containers
+docker-compose logs -f            # View logs
+docker-compose ps                  # List containers
+docker-compose restart            # Restart containers
+docker-compose exec dot-leads-automation bash  # Enter container
+docker build -t dot-leads-automation:latest .   # Build image
+```
+
 ### Comparison
 
 | Method | Pros | Cons |
@@ -269,6 +348,7 @@ pm2 delete dot-leads-automation   # Remove from PM2
 | GitHub Actions | Free, easy setup, integrated with repo | Limited to GitHub repos |
 | Cron | Full control, no external dependencies | Requires always-on server |
 | PM2 | Process monitoring, logging, auto-restart | Requires Node.js |
+| Docker | Consistent environment, easy deployment | Requires Docker installation |
 | AWS Lambda | Serverless, scalable, pay-per-use | AWS account required |
 | Cloud Functions | Serverless, integrated with GCP | GCP account required |
 
