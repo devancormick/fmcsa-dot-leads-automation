@@ -4,7 +4,7 @@ Automated system that pulls all newly created USDOT numbers in the U.S. every da
 
 ## Quick Start (Docker - Recommended)
 
-**Single command to start and run continuously:**
+**Production Mode - Single command to start and run continuously:**
 
 ```bash
 ./start.sh
@@ -16,6 +16,19 @@ This will:
 - Keep it running continuously
 - Execute tasks daily at 2:00 AM automatically
 - Continue running until you stop it with `docker-compose down`
+
+**Test Mode - Run every 5 minutes for testing:**
+
+```bash
+./start-test.sh
+```
+
+This will:
+- Build the Docker container
+- Start in TEST MODE
+- Execute tasks every 5 minutes (instead of daily)
+- Perfect for testing and development
+- Same functionality as production mode
 
 ## Features
 
@@ -285,7 +298,7 @@ Docker provides a consistent environment and the easiest way to run the automati
 - Docker installed: https://docs.docker.com/get-docker/
 - Docker Compose installed (usually included with Docker Desktop)
 
-**🚀 Quick Start - Single Command:**
+**🚀 Quick Start - Production Mode:**
 ```bash
 ./start.sh
 ```
@@ -297,6 +310,17 @@ This single command will:
 - Execute tasks daily at 2:00 AM automatically
 - Continue running until stopped
 
+**🧪 Test Mode - Run every 5 minutes:**
+```bash
+./start-test.sh
+```
+
+Test mode features:
+- Runs every 5 minutes (instead of daily)
+- Perfect for testing and development
+- Same functionality as production mode
+- Easy to verify the system is working
+
 **Stop the container:**
 ```bash
 docker-compose down
@@ -305,6 +329,18 @@ docker-compose down
 **View logs:**
 ```bash
 docker-compose logs -f
+```
+
+**Switch between modes:**
+```bash
+# Stop current mode
+docker-compose down
+
+# Start production mode (daily at 2 AM)
+./start.sh
+
+# OR start test mode (every 5 minutes)
+./start-test.sh
 ```
 
 **Manual Docker Commands:**
@@ -336,10 +372,21 @@ docker-compose restart
 
 **How it works:**
 - The container runs `scheduler.py` which keeps the container alive
-- Scheduler executes `main.py` daily at 2:00 AM UTC
+- **Production mode**: Scheduler executes `main.py` daily at 2:00 AM UTC
+- **Test mode**: Scheduler executes `main.py` every 5 minutes (configurable)
 - Container runs continuously until explicitly stopped
 - All logs are saved to `./logs/` directory
 - CSV files are saved to `./output/csv/` directory
+
+**Test Mode Configuration:**
+You can customize the test interval by setting environment variables:
+```bash
+# Run every 10 minutes instead of 5
+TEST_MODE=true TEST_INTERVAL_MINUTES=10 docker-compose up -d
+
+# Or edit docker-compose.yml and set:
+# TEST_INTERVAL_MINUTES=10
+```
 
 **Docker Features:**
 - ✅ Runs continuously with a single command
@@ -355,7 +402,8 @@ docker-compose restart
 - `Dockerfile` - Container definition
 - `docker-compose.yml` - Container orchestration
 - `scheduler.py` - Continuous scheduler that keeps container running
-- `start.sh` - Single command startup script
+- `start.sh` - Single command startup script (production mode)
+- `start-test.sh` - Test mode startup script (runs every 5 minutes)
 - `.dockerignore` - Files excluded from build
 
 **Useful Docker Commands:**

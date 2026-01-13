@@ -20,8 +20,17 @@ services:
     environment:
       # Environment variables can be set here or in .env file
       - PYTHONUNBUFFERED=1
+      # Test mode: set TEST_MODE=true to run every 5 minutes (for testing)
+      - TEST_MODE=${TEST_MODE:-false}
+      - TEST_INTERVAL_MINUTES=${TEST_INTERVAL_MINUTES:-5}
     # Run scheduler to keep container running and execute tasks on schedule
-    command: python scheduler.py
+    # Use --test-mode flag for testing (runs every 5 minutes)
+    command: >
+      sh -c "if [ \"$$TEST_MODE\" = \"true\" ]; then
+        python scheduler.py --test-mode --test-interval $$TEST_INTERVAL_MINUTES;
+      else
+        python scheduler.py;
+      fi"
     # Healthcheck to ensure container is running
     healthcheck:
       test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
